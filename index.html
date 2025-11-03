@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ryan's Games</title>
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+      <source src="sounds/relaxed-scene.mp3" type="audio/mp3">
+    </audio>
+  <style>
+    /* Space theme styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, sans-serif;
+      color: #ffffff;
+      background: #000000;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .space-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 1.5s infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    h1 {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 48px;
+      color: #ffffff;
+      margin: 40px 0;
+      text-shadow: 
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000,
+        0 0 20px rgba(255, 255, 255, 0.5);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin-top: 60px;
+      align-items: center;
+    }
+
+    .menu-btn {
+      font-size: 24px;
+      padding: 20px 50px;
+      min-width: 250px;
+      border: 3px solid #4B0082;
+      border-radius: 12px;
+      background: rgba(75, 0, 130, 0.6);
+      color: white;
+      cursor: pointer;
+      transition: all 0.5s ease;
+      animation: pulse 3s infinite;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 0 20px rgba(75, 0, 130, 0.4);
+    }
+
+    .menu-btn:hover {
+      transform: scale(1.1);
+      background: rgba(75, 0, 130, 0.8);
+      box-shadow: 0 0 30px rgba(75, 0, 130, 0.6);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    #minesweeper-app,
+    #snake-app,
+    #fps-app {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      color: #1a1a1a;
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+      z-index: 2;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="stars" class="space-background"></div>
+  <div class="wrapper">
+    <h1>Ryan's Games</h1>
+    <div class="menu">
+      <button onclick="openGame('snake.html')" class="menu-btn">Snake</button>
+      <button onclick="openGame('minesweeper.html')" class="menu-btn">Minesweeper</button>
+      <button onclick="openGame('fps.html')" class="menu-btn">First Person</button>
+    </div>
+    
+    <script>
+      function openGame(gameUrl) {
+        window.open(gameUrl, '_blank');
+        window.close();
+      }
+    </script>
+
+    <!-- Snake app -->
+    <div id="snake-app" class="game-hidden">
+      <div class="game-header">
+        <button id="backFromSnake" class="small-btn">Back</button>
+        <h2>Snake</h2>
+      </div>
+      <div class="snake-container">
+        <div class="snake-left">
+          <canvas id="snakeCanvas" width="400" height="400"></canvas>
+          <div class="overlay" id="snakeOverlay">
+            <button id="snakeStart" class="big-btn">Start</button>
+            <button id="openSnakeSettings" class="big-btn">Settings</button>
+          </div>
+          <!-- persistent settings toggle visible during play (small and unobtrusive) -->
+          <button id="snakeSettingsToggle" class="settings-toggle" title="Settings">⚙</button>
+        </div>
+        <div class="snake-controls">
+          <div>Apples eaten: <span id="appleCount">0</span></div>
+          <button id="snakeRestart">Restart</button>
+        </div>
+
+        <!-- Settings panel -->
+        <div id="snakeSettings" class="settings-panel game-hidden">
+          <button class="close-x" id="closeSnakeSettings">✕</button>
+          <h3>Gamemodes</h3>
+          <div class="settings-row">
+            <label>Color</label>
+            <input id="snakeColor" type="color" value="#f59e0b">
+          </div>
+          <div class="settings-row">
+            <label>Speed</label>
+            <input id="snakeSpeed" type="range" min="50" max="300" step="10" value="120">
+          </div>
+          <div class="settings-row">
+            <label>Apple multiplier</label>
+            <div id="appleMultiplier" class="mult-grid">
+              <button class="mult-btn" data-val="1">1x</button>
+              <button class="mult-btn" data-val="2">2x</button>
+              <button class="mult-btn" data-val="3">3x</button>
+              <button class="mult-btn" data-val="4">4x</button>
+              <button class="mult-btn" data-val="5">5x</button>
+              <button class="mult-btn" data-val="fib">Fibonacci x</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- First Person game -->
+    <div id="fps-app" class="game-hidden">
+      <div class="game-header">
+        <button id="backFromFPS" class="small-btn">Back</button>
+        <h2>First Person Game</h2>
+      </div>
+      <div class="fps-container">
+        <canvas id="fpsCanvas" width="800" height="600"></canvas>
+        <div id="fpsSettings" class="settings-panel">
+          <div class="slider-container">
+            <label>Field of View</label>
+            <input id="fovSlider" type="range" min="45" max="90" value="60">
+            <span id="fovValue" class="value-display">60°</span>
+          </div>
+          <div class="slider-container">
+            <label>Resolution</label>
+            <input id="resolutionSlider" type="range" min="160" max="800" step="80" value="320">
+            <span id="resValue" class="value-display">320</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minesweeper app (original UI) -->
+    <div id="minesweeper-app" class="game-hidden">
+      <div class="game-header">
+        <button id="backFromMines" class="small-btn">Back</button>
+        <h2>Minesweeper</h2>
+      </div>
+
+      <div class="controls-top">
+        <div class="left-controls">
+          <div class="overlay" id="minesOverlay">
+            <button id="minesStart" class="big-btn">Start</button>
+            <button id="openMinesSettings" class="big-btn">Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label>Rows: <input id="rows" type="number" min="5" max="30" value="9"></label>
+        <label>Cols: <input id="cols" type="number" min="5" max="30" value="9"></label>
+        <label>Mines: <input id="mines" type="number" min="1" value="10"></label>
+        <button id="newGame">New Game</button>
+        <div class="status">
+          <span id="mineCount">Mines: 0</span>
+          <span id="timer">Time: 0s</span>
+        </div>
+      </div>
+
+      <div id="minesSettings" class="settings-panel game-hidden">
+        <button class="close-x" id="closeMinesSettings">✕</button>
+        <h3>Gamemode</h3>
+        <div class="settings-row">
+          <button class="mode-btn" data-rows="5" data-cols="5">Easy (5x5)</button>
+          <button class="mode-btn" data-rows="15" data-cols="15">Medium (15x15)</button>
+          <button class="mode-btn" data-rows="20" data-cols="20">Hard (20x20)</button>
+        </div>
+      </div>
+
+      <div id="board" class="board" tabindex="0"></div>
+
+      <div class="footer">
+        Left-click to reveal, right-click to flag. Built as a simple static demo.
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+  <script src="snake.js"></script>
+  <script src="fps.js"></script>
+  <script>
+    // Create animated stars background
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const numberOfStars = 200;
+
+      for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        // Random size
+        const size = Math.random() * 3;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random twinkle delay
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Make sure game containers are visible
+    document.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      
+      // Ensure game containers have proper z-index and visibility
+      const gameContainers = ['minesweeper-app', 'snake-app', 'fps-app'];
+      gameContainers.forEach(id => {
+        const container = document.getElementById(id);
+        if (container) {
+          container.style.position = 'relative';
+          container.style.zIndex = '2';
+        }
+      });
+    });
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>

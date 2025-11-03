@@ -1,0 +1,32 @@
+/* Basic styling for snake canvas and controls */
+.snake-container{display:flex;gap:12px;align-items:flex-start}
+.snake-controls{display:flex;flex-direction:column;gap:8px}
+canvas#snakeCanvas{border:6px solid #263238;background:#0f172a;border-radius:6px}
+.small-btn{padding:6px 8px;border-radius:6px;border:1px solid #94a3b8;background:white;cursor:pointer}
+.game-hidden{display:none}
+.menu{display:flex;gap:12px;margin-bottom:12px}
+.menu-btn{padding:10px 18px;border-radius:8px;border:1px solid #94a3b8;background:white;cursor:pointer;font-weight:700}
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+
+/* overlays and settings */
+.snake-container{display:flex;gap:12px;align-items:flex-start}
+.snake-left{position:relative}
+.overlay{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:8px}
+.settings-toggle{position:absolute;right:8px;top:8px;z-index:30;width:28px;height:28px;padding:4px;border-radius:50%;font-size:14px;background:rgba(255,255,255,0.9);border:1px solid #94a3b8;cursor:pointer;opacity:0.85}
+.settings-toggle:hover{opacity:1}
+.big-btn{padding:10px 14px;border-radius:8px;border:1px solid #94a3b8;background:white;cursor:pointer;font-weight:700}
+.settings-panel{position:absolute;left:12px;top:12px;background:white;padding:12px;border-radius:8px;border:1px solid #94a3b8;width:300px;z-index:40}
+.close-x{position:absolute;right:8px;top:6px;background:#ef4444;color:white;border:none;border-radius:4px;padding:2px 6px;cursor:pointer}
+.settings-row{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.mult-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mult-btn{padding:6px;border-radius:6px;border:1px solid #94a3b8;background:white;cursor:pointer}
+.selected{background:#10b981;color:white;border-color:#059669}
+
+#appleCount{font-weight:800}
+
+/* minesweeper related small styles */
+.settings-panel .mode-btn{margin-right:6px;padding:8px 10px}
+
+/* make board cells fill available space by using fractional columns and 1:1 aspect ratio */
+.board.fr{grid-auto-rows:1fr}
+.board.fr .cell{width:auto;aspect-ratio:1}

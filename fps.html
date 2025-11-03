@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>First Person - Ryan's Games</title>
+    <!-- Sound Effects -->
+    <audio id="footstepSound" preload="auto">
+      <source src="sounds/footstep.mp3" type="audio/mp3">
+    </audio>
+  <style>
+    /* Space theme */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000000;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .space-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 1.5s infinite alternate;
+    }
+
+    .game-container {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #fpsCanvas {
+      background: #0f172a;
+      border: 3px solid #4B0082;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(75, 0, 130, 0.4);
+      margin: 20px 0;
+      image-rendering: pixelated;
+    }
+
+    .settings {
+      position: fixed;
+      top: 20px;
+      right: -320px;
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 300px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #4B0082;
+      transition: right 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .settings.visible {
+      right: 20px;
+    }
+    
+    .settings-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: rgba(75, 0, 130, 0.6);
+      border: 2px solid #4B0082;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    
+    .close-settings {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #ff0000;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    
+    .close-settings:hover {
+      color: #ff3333;
+    }
+
+    .slider-container {
+      margin: 10px 0;
+    }
+
+    .slider-container label {
+      display: block;
+      margin-bottom: 5px;
+      color: white;
+    }
+
+    input[type="range"] {
+      width: 200px;
+      margin: 10px 0;
+    }
+
+    .btn {
+      font-size: 18px;
+      padding: 10px 25px;
+      border: 2px solid #4B0082;
+      border-radius: 8px;
+      background: rgba(75, 0, 130, 0.6);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .btn:hover {
+      background: rgba(75, 0, 130, 0.8);
+      transform: scale(1.05);
+    }
+
+    .settings-toggle-btn {
+      transition: all 0.3s ease;
+    }
+
+    .settings-toggle-btn:hover {
+      background: rgba(75, 0, 130, 0.8);
+      transform: scale(1.05);
+    }
+
+    .header {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-family: "Times New Roman", Times, serif;
+      color: #ffffff;
+      margin: 0;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="stars" class="space-background"></div>
+  <div class="game-container">
+    <div class="header">
+      <button onclick="window.location.href='index.html'" class="btn">Back to Menu</button>
+      <h1>First Person</h1>
+      <div style="width: 100px;"></div>
+    </div>
+
+    <canvas id="fpsCanvas" width="1024" height="768"></canvas>
+
+    <button id="settingsToggle" class="settings-toggle-btn">Settings</button>
+    
+    <div class="settings">
+      <button class="close-settings">✕</button>
+      <div class="settings-section">
+        <h3>General Settings</h3>
+        <div class="slider-container">
+          <label>Field of View</label>
+          <input id="fovSlider" type="range" min="45" max="90" value="60">
+          <span id="fovValue">60°</span>
+        </div>
+        <div class="slider-container">
+          <label>Resolution</label>
+          <input id="resolutionSlider" type="range" min="160" max="1024" step="32" value="320">
+          <span id="resValue">320</span>
+        </div>
+        <div class="slider-container">
+          <label>Mouse Sensitivity</label>
+          <input id="sensitivitySlider" type="range" min="1" max="10" step="0.5" value="5">
+          <span id="sensitivityValue">5</span>
+        </div>
+        <div class="slider-container">
+          <label>Brightness</label>
+          <input id="brightnessSlider" type="range" min="0.5" max="2" step="0.1" value="1">
+          <span id="brightnessValue">1.0</span>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <button class="settings-tab" data-target="floorSettings">Floor Settings</button>
+        <button class="settings-tab" data-target="wallSettings">Wall Settings</button>
+        <button class="settings-tab" data-target="ceilingSettings">Ceiling Settings</button>
+        <button class="settings-tab" data-target="mapDesigner">Map Designer</button>
+
+        <div id="floorSettings" class="tab-content">
+          <h4>Floor Style</h4>
+          <div class="pattern-select">
+            <button class="pattern-btn" data-pattern="checkerboard">Checkerboard</button>
+            <button class="pattern-btn" data-pattern="wood">Wood</button>
+            <button class="pattern-btn" data-pattern="carpet">Carpet</button>
+            <button class="pattern-btn" data-pattern="marble">Marble</button>
+            <button class="pattern-btn" data-pattern="concrete">Concrete</button>
+          </div>
+          <div id="checkerColorPickers" class="color-pickers">
+            <div>
+              <label>Color 1:</label>
+              <input type="color" id="checkerColor1" value="#ffffff">
+            </div>
+            <div>
+              <label>Color 2:</label>
+              <input type="color" id="checkerColor2" value="#000000">
+            </div>
+          </div>
+          <div id="carpetColorPicker" class="color-pickers">
+            <label>Carpet Color:</label>
+            <input type="color" id="carpetColor" value="#8b0000">
+          </div>
+        </div>
+
+        <div id="wallSettings" class="tab-content">
+          <h4>Wall Style</h4>
+          <div class="pattern-select">
+            <button class="pattern-btn" data-pattern="wood-vertical">Wood (Vertical)</button>
+            <button class="pattern-btn" data-pattern="backrooms">Backrooms</button>
+            <button class="pattern-btn" data-pattern="matte">Matte</button>
+          </div>
+          <div id="wallColorPicker" class="color-pickers">
+            <label>Wall Color (Matte):</label>
+            <input type="color" id="wallColor" value="#808080">
+          </div>
+        </div>
+
+        <div id="ceilingSettings" class="tab-content">
+          <h4>Ceiling Style</h4>
+          <div class="pattern-select">
+            <button class="pattern-btn" data-pattern="wood">Wood</button>
+            <button class="pattern-btn" data-pattern="matte">Matte</button>
+          </div>
+          <div id="ceilingColorPicker" class="color-pickers">
+            <label>Ceiling Color (Matte):</label>
+            <input type="color" id="ceilingColor" value="#ffffff">
+          </div>
+        </div>
+
+        <div id="mapDesigner" class="tab-content">
+          <div class="map-container">
+            <canvas id="mapCanvas" width="400" height="400"></canvas>
+            <input type="range" id="mapScale" min="0.5" max="2" step="0.1" value="1" 
+              class="vertical-slider" title="Map Scale">
+          </div>
+          <div class="map-tools">
+            <button id="wallBrush" class="tool-btn">Wall</button>
+            <button id="eraserBrush" class="tool-btn">Eraser</button>
+            <button id="moveSpawn" class="tool-btn">Move Spawn</button>
+            <button id="clearMap" class="tool-btn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .settings {
+        position: fixed;
+        top: 20px;
+        right: -320px;
+        max-height: 80vh;
+        overflow-y: auto;
+        width: 300px;
+        transition: right 0.3s ease;
+      }
+      
+      .settings.visible {
+        right: 20px;
+      }
+      
+      .settings-toggle-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: rgba(75, 0, 130, 0.6);
+        border: 2px solid #4B0082;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      
+      .close-settings {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #ff0000;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px 10px;
+      }
+      
+      .close-settings:hover {
+        color: #ff3333;
+      }
+      }
+
+      .settings-section {
+        margin-bottom: 20px;
+      }
+
+      .settings-tab {
+        margin: 5px;
+        padding: 8px 15px;
+        background: rgba(75, 0, 130, 0.4);
+        border: 1px solid #4B0082;
+        color: white;
+        cursor: pointer;
+      }
+
+      .settings-tab:hover {
+        background: rgba(75, 0, 130, 0.6);
+      }
+
+      .tab-content {
+        display: none;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .pattern-select {
+        display: grid;
+        gap: 5px;
+        margin: 10px 0;
+      }
+
+      .pattern-btn {
+        padding: 5px 10px;
+        background: rgba(75, 0, 130, 0.4);
+        border: 1px solid #4B0082;
+        color: white;
+        cursor: pointer;
+      }
+
+      .pattern-btn.active {
+        background: rgba(75, 0, 130, 0.8);
+      }
+
+      .color-pickers {
+        margin: 10px 0;
+        display: none;
+      }
+
+      .color-pickers.active {
+        display: block;
+      }
+
+      .map-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      #mapCanvas {
+        background: #1a1a1a;
+        border: 1px solid #4B0082;
+      }
+
+      .vertical-slider {
+        writing-mode: bt-lr;
+        -webkit-appearance: slider-vertical;
+        width: 20px;
+        height: 400px;
+      }
+
+      .map-tools {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+      }
+
+      .tool-btn {
+        padding: 5px 10px;
+        background: rgba(75, 0, 130, 0.4);
+        border: 1px solid #4B0082;
+        color: white;
+        cursor: pointer;
+      }
+
+      .tool-btn.active {
+        background: rgba(75, 0, 130, 0.8);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .modal-overlay.visible {
+        display: flex;
+      }
+
+      .modal-content {
+        background: rgba(15, 23, 42, 0.95);
+        border: 2px solid #4B0082;
+        border-radius: 8px;
+        padding: 20px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        color: white;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #ff0000;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+      }
+
+      .modal-close:hover {
+        color: #ff3333;
+      }
+
+      .modal-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #fff;
+        text-align: center;
+      }
+
+      .modal-section {
+        margin-bottom: 20px;
+      }
+    </style>
+  </div>
+
+  <!-- Modal Overlays -->
+  <div id="floorModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('floorModal')">×</button>
+      <h2 class="modal-title">Floor Settings</h2>
+      <div class="modal-section">
+        <div class="settings-section">
+          <h3>Floor Color</h3>
+          <input type="color" id="floorColor" value="#4B0082">
+        </div>
+        <div class="settings-section">
+          <h3>Floor Pattern</h3>
+          <select id="floorPattern">
+            <option value="solid">Solid</option>
+            <option value="checkered">Checkered</option>
+            <option value="grid">Grid</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wallModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('wallModal')">×</button>
+      <h2 class="modal-title">Wall Settings</h2>
+      <div class="modal-section">
+        <div class="settings-section">
+          <h3>Wall Color</h3>
+          <input type="color" id="wallColor" value="#4B0082">
+        </div>
+        <div class="settings-section">
+          <h3>Wall Texture</h3>
+          <select id="wallTexture">
+            <option value="solid">Solid</option>
+            <option value="brick">Brick</option>
+            <option value="stone">Stone</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="fps.js"></script>
+  <script>
+    // Create stars background
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const numberOfStars = 200;
+
+      for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        const size = Math.random() * 3;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Settings panel toggle
+    function toggleSettings() {
+      const settings = document.querySelector('.settings');
+      settings.classList.toggle('visible');
+    }
+
+    // Modal control functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('visible');
+      // Pause game updates if needed
+      if(window.currentFPSGame) {
+        window.currentFPSGame.isPaused = true;
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('visible');
+      // Resume game updates
+      if(window.currentFPSGame) {
+        window.currentFPSGame.isPaused = false;
+      }
+    }
+
+    // Add modal control to settings buttons
+    function setupModalControls() {
+      const floorBtn = document.querySelector('[data-target="floorSettings"]');
+      const wallBtn = document.querySelector('[data-target="wallSettings"]');
+
+      floorBtn.addEventListener('click', () => openModal('floorModal'));
+      wallBtn.addEventListener('click', () => openModal('wallModal'));
+
+      // Close modal when clicking outside
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      if(window.initFPS) {
+        window.initFPS();
+      }
+
+      // Add click handlers for settings toggle
+      document.getElementById('settingsToggle').addEventListener('click', toggleSettings);
+      document.querySelector('.close-settings').addEventListener('click', toggleSettings);
+
+      // Setup modal controls
+      setupModalControls();
+    });
+  </script>
+</body>
+</html>
